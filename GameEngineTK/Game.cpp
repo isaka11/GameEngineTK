@@ -47,8 +47,9 @@ void Game::Initialize(HWND window, int width, int height)
 
 	m_view = Matrix::CreateLookAt(Vector3(0, 2.f, 5.f),
 		Vector3(1, 0, 0), Vector3(0, 1, 0));
+
 	m_proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f,
-		float(m_outputWidth) / float(m_outputHeight), 0.1f, 10.f);
+		float(m_outputWidth) / float(m_outputHeight), 0.1f, 500.f);
 
 	m_effect->SetView(m_view);
 	m_effect->SetProjection(m_proj);
@@ -67,6 +68,18 @@ void Game::Initialize(HWND window, int width, int height)
 
 	//デバッグカメラの生成
 	m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth, m_outputHeight);
+
+	//エフェクトファクトリの生成
+	m_factory = std::make_unique<EffectFactory>(m_d3dDevice.Get());
+
+	//テクスチャの読み込みパスの指定
+	m_factory->SetDirectory(L"Resources");
+
+	//モデルの読み込み、生成
+	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Graund1m.cmo", *m_factory);
+
+	//モデルの読み込み、生成
+	m_modelSkydome = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Skydome.cmo", *m_factory);
 }
 
 // Executes the basic game loop.
@@ -139,13 +152,13 @@ void Game::Render()
 	m_effect->Apply(m_d3dContext.Get());
 	m_d3dContext->IASetInputLayout(m_inputLayout.Get());
 
+	//モデル（地面）の描画
+	m_modelGround->Draw(m_d3dContext.Get(), m_states, m_world, m_view, m_proj);
+
+	//モデル（天球）の描画
+	m_modelSkydome->Draw(m_d3dContext.Get(), m_states, m_world, m_view, m_proj);
+
 	m_batch->Begin();
-
-	//m_batch->DrawLine(
-	//	VertexPositionColor(SimpleMath::Vector3(0, 0, 0), SimpleMath::Color(1, 1, 1)),
-	//	VertexPositionColor(SimpleMath::Vector3(800, 600, 0), SimpleMath::Color(1, 1, 1))
-	//);
-
 	VertexPositionColor v1(Vector3(0.f, 0.5f, 0.5f), Colors::Yellow);
 	VertexPositionColor v2(Vector3(0.5f, -0.5f, 0.5f), Colors::Yellow);
 	VertexPositionColor v3(Vector3(-0.5f, -0.5f, 0.5f), Colors::Yellow);

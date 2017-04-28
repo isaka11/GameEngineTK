@@ -13,6 +13,9 @@
 #include <Model.h>
 #include "DebugCamera.h"
 
+const int Ball_Number = 20;
+const int Max_Graund = 200;
+
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
 class Game
@@ -54,6 +57,8 @@ private:
     HWND                                            m_window;
     int                                             m_outputWidth;
     int                                             m_outputHeight;
+	float											m_time;
+	float											m_time2;
 
     D3D_FEATURE_LEVEL                               m_featureLevel;
     Microsoft::WRL::ComPtr<ID3D11Device>            m_d3dDevice;
@@ -83,9 +88,18 @@ private:
 	//エフェクトファクトリ
 	std::unique_ptr<DirectX::EffectFactory> m_factory;
 
-	//モデル(天球)
-	std::unique_ptr<DirectX::Model> m_modelGround;
-
 	//モデル(地面)
+	std::unique_ptr<DirectX::Model> m_modelGround[Max_Graund][Max_Graund];
+
+	//モデル(天球)
 	std::unique_ptr<DirectX::Model> m_modelSkydome;
+
+	//モデル(ボール)
+	std::unique_ptr<DirectX::Model> m_modelBall[Ball_Number];
+
+	//ボールのワールド行列
+	DirectX::SimpleMath::Matrix m_worldBall[Ball_Number];
+
+	//地面のワールド行列
+	DirectX::SimpleMath::Matrix m_worldGraund[Max_Graund][Max_Graund];
 };

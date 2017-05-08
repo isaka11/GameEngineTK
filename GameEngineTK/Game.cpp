@@ -42,6 +42,8 @@ void Game::Initialize(HWND window, int width, int height)
 	//初期化はここに書く
 	m_time = 0.0f;
 	m_time2 = 0.0f;
+	m_timeflag = 0;
+	m_Spin_Angle = 0.0f;
 
 	m_batch = std::make_unique<PrimitiveBatch<VertexPositionNormal>>(m_d3dContext.Get());
 
@@ -68,6 +70,13 @@ void Game::Initialize(HWND window, int width, int height)
 		shaderByteCode, byteCodeLength,
 		m_inputLayout.GetAddressOf());
 
+	////ティーポットの位置をランダムで決める
+	//for (int i = 0; i < Teapot_Number; i++)
+	//{
+	//	m_Height_pos[i] = rand() % 50 - 25;
+	//	m_Width_pos[i] = rand() % 50 - 25;
+	//}
+
 	//デバッグカメラの生成
 	m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth, m_outputHeight);
 
@@ -78,22 +87,22 @@ void Game::Initialize(HWND window, int width, int height)
 	m_factory->SetDirectory(L"Resources");
 
 	//モデルの読み込み、生成
-	for (int i = 0; i < Max_Graund; i++)
-	{
-		for (int j = 0; j < Max_Graund; j++)
-		{
-			m_modelGround[i][j] = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Graund1m.cmo", *m_factory);
-		}
-	}
+	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Graund200m.cmo", *m_factory);
 
 	//モデルの読み込み、生成
 	m_modelSkydome = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Skydome.cmo", *m_factory);
 
 	//モデルの読み込み、生成
-	for (int i = 0; i < Ball_Number; i++)
-	{
-		m_modelBall[i] = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Ball.cmo", *m_factory);
-	}
+	m_modelHead = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Head.cmo", *m_factory);
+
+	////モデルの読み込み、生成
+	//for (int i = 0; i < Teapot_Number; i++)
+	//{
+	//	m_modelTeapot[i] = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Teapot.cmo", *m_factory);
+	//}
+
+	//キーボードの初期化
+	keyboard = std::make_unique<Keyboard>();
 }
 
 // Executes the basic game loop.
@@ -121,88 +130,149 @@ void Game::Update(DX::StepTimer const& timer)
 	//ビュー行列を取得
 	m_view = m_debugCamera->GetCameraMatrix();
 
-	m_time++;
-	m_time2--;
+	//m_time++;
 
-	for (int i = 0; i < Ball_Number; i++)
+	//if (m_time2 >= 4.0f)
+	//{
+	//	m_timeflag = 1;
+	//}
+	//else if(m_time2 <= 0.0f)
+	//{
+	//	m_timeflag = 0;
+	//}
+
+	//if (m_timeflag == 1)
+	//{
+	//	m_time2 -= 1.0f / 60.0f;
+	//}
+	//else if (m_timeflag == 0)
+	//{
+	//	m_time2 += 1.0f / 60.0f;
+	//}
+
+	////ティーポットを20個配置
+	//for (int i = 0; i < Teapot_Number; i++)
+	//{
+	//	//ロール
+	//	Matrix rotmat_z = Matrix::CreateRotationZ(XMConvertToRadians(0.0f));
+
+	//	//ピッチ（仰角）
+	//	Matrix rotmat_x = Matrix::CreateRotationX(XMConvertToRadians(0.0f));
+
+	//	//ヨー（方位角）
+	//	Matrix rotmat_y = Matrix::CreateRotationY(XMConvertToRadians(m_time));
+
+	//	//スケーリング
+	//	Matrix scalemat = Matrix::CreateScale(1.0f + m_time2);
+
+	//	//ボールのワールド行列を計算
+	//	//回転行列（合成）
+	//	Matrix rotmat = rotmat_z * rotmat_x * rotmat_y;
+
+	//	//平行移動
+	//	Matrix transmat = Matrix::CreateTranslation(m_Height_pos[i], 0.0f, m_Width_pos[i]);
+
+	//	//ワールド行列の合成
+	//	m_worldTeapot[i] = scalemat * rotmat * transmat;
+	//}
+
+	//地面（200m）の配置
+	////ロール
+	//Matrix rotmat_z = Matrix::CreateRotationZ(XMConvertToRadians(0.0f));
+
+	////ピッチ（仰角）
+	//Matrix rotmat_x = Matrix::CreateRotationX(XMConvertToRadians(0.0f));
+
+	////ヨー（方位角）
+	//Matrix rotmat_y = Matrix::CreateRotationY(XMConvertToRadians(0.0f));
+
+	////スケーリング
+	//Matrix scalemat = Matrix::CreateScale(1.0f);
+
+	////ボールのワールド行列を計算
+	////回転行列（合成）
+	//Matrix rotmat = rotmat_z * rotmat_x * rotmat_y;
+
+	////平行移動
+	//Matrix transmat = Matrix::CreateTranslation(0.0f, 0.0f, 0.0f);
+
+
+
+	//頭の配置
+	//ロール
+	Matrix rotmat_z2 = Matrix::CreateRotationZ(XMConvertToRadians(0.0f));
+
+	//ピッチ（仰角）
+	Matrix rotmat_x2 = Matrix::CreateRotationX(XMConvertToRadians(0.0f));
+
+	//ヨー（方位角）
+	Matrix rotmat_y2 = Matrix::CreateRotationY(XMConvertToRadians(m_Spin_Angle));
+
+	//スケーリング
+	Matrix scalemat2 = Matrix::CreateScale(1.0f);
+
+	//ボールのワールド行列を計算
+	//回転行列（合成）
+	Matrix rotmat2 = rotmat_z2 * rotmat_x2 * rotmat_y2;
+
+	//平行移動
+	Matrix transmat2 = Matrix::CreateTranslation(0.0f, 0.0f, 0.0f);
+
+	//ワールド行列の合成
+	m_world = scalemat2 * rotmat2 * transmat2;
+
+	//キーボードの状態取得
+	Keyboard::State g_key = keyboard->GetState();
+
+	//Wキーを押すと
+	if (g_key.W)
 	{
-		if (i < 10)
-		{
-			//ロール
-			Matrix rotmat_z = Matrix::CreateRotationZ(XMConvertToRadians(0.0f));
+		//移動ベクトル（Z座標）
+		Vector3 moveV(0, 0, -0.1f);
 
-			//ピッチ（仰角）
-			Matrix rotmat_x = Matrix::CreateRotationX(XMConvertToRadians(0.0f));
+		//移動量ベクトルを自機の角度分回転させる
+		moveV = Vector3::TransformNormal(moveV, tank_world);
 
-			//ヨー（方位角）
-			Matrix rotmat_y = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i + m_time));
-
-			//スケーリング
-			Matrix scalemat = Matrix::CreateScale(1.0f);
-
-			//ボールのワールド行列を計算
-			//回転行列（合成）
-			Matrix rotmat = rotmat_z * rotmat_x * rotmat_y;
-
-			//平行移動
-			Matrix transmat = Matrix::CreateTranslation(20.0f, 0.0f, 0.0f);
-
-			//ワールド行列の合成
-			m_worldBall[i] = scalemat * transmat * rotmat;
-		}
-		else
-		{
-			//ロール
-			Matrix rotmat_z = Matrix::CreateRotationZ(XMConvertToRadians(0.0f));
-
-			//ピッチ（仰角）
-			Matrix rotmat_x = Matrix::CreateRotationX(XMConvertToRadians(0.0f));
-
-			//ヨー（方位角）
-			Matrix rotmat_y = Matrix::CreateRotationY(XMConvertToRadians(36.0f * (i - 10) + m_time2 ));
-
-			//スケーリング
-			Matrix scalemat = Matrix::CreateScale(1.0f);
-
-			//ボールのワールド行列を計算
-			//回転行列（合成）
-			Matrix rotmat = rotmat_z * rotmat_x * rotmat_y;
-
-			//平行移動
-			Matrix transmat = Matrix::CreateTranslation(40.0f, 0.0f, 0.0f);
-
-			//ワールド行列の合成
-			m_worldBall[i] = scalemat * transmat * rotmat;
-		}
+		//座標を移動させる
+		tank_pos += moveV;
 	}
 
-	for (int i = 0; i < Max_Graund; i++)
+	//Sキーを押すと
+	if (g_key.S)
 	{
-		for (int j = 0; j < Max_Graund; j++)
-		{
-			//ロール
-			Matrix rotmat_z = Matrix::CreateRotationZ(XMConvertToRadians(0.0f));
+		//移動ベクトル（Z座標）
+		Vector3 moveV(0, 0, 0.1f);
 
-			//ピッチ（仰角）
-			Matrix rotmat_x = Matrix::CreateRotationX(XMConvertToRadians(0.0f));
+		//移動量ベクトルを自機の角度分回転させる
+		moveV = Vector3::TransformNormal(moveV, tank_world);
 
-			//ヨー（方位角）
-			Matrix rotmat_y = Matrix::CreateRotationY(XMConvertToRadians(0.0f));
-
-			//スケーリング
-			Matrix scalemat = Matrix::CreateScale(1.0f);
-
-			//ボールのワールド行列を計算
-			//回転行列（合成）
-			Matrix rotmat = rotmat_z * rotmat_x * rotmat_y;
-
-			//平行移動
-			Matrix transmat = Matrix::CreateTranslation(-100.0f + j, 0.0f, -100.0f + i);
-
-			//ワールド行列の合成
-			m_worldGraund[i][j] = scalemat * rotmat * transmat;
-		}
+		//座標を移動させる
+		tank_pos += moveV;
 	}
+
+	//Aキーを押すと
+	if (g_key.A)
+	{
+		m_Spin_Angle += 0.1f;
+	}
+
+	//Dキーを押すと
+	if (g_key.D)
+	{
+		m_Spin_Angle -= 0.1f;
+	}
+
+	//自機のワールド行列を計算
+
+	//ヨー（方位角）
+	Matrix rotmat = Matrix::CreateRotationY(m_Spin_Angle);
+
+	Matrix transmat = Matrix::CreateTranslation(tank_pos);
+
+	////ワールド行列の合成
+	//m_worldGraund = scalemat * rotmat * transmat;
+
+	tank_world = rotmat * transmat;
 }
 
 // Draws the scene.
@@ -250,22 +320,19 @@ void Game::Render()
 	m_d3dContext->IASetInputLayout(m_inputLayout.Get());
 
 	//モデル（地面）の描画
-	for (int i = 0; i < Max_Graund; i++)
-	{
-		for (int j = 0; j < Max_Graund; j++)
-		{
-			m_modelGround[i][j]->Draw(m_d3dContext.Get(), m_states, m_worldGraund[i][j], m_view, m_proj);
-		}
-	}
+	m_modelGround->Draw(m_d3dContext.Get(), m_states, Matrix::Identity, m_view, m_proj);
 
 	//モデル（天球）の描画
-	m_modelSkydome->Draw(m_d3dContext.Get(), m_states, m_world, m_view, m_proj);
+	m_modelSkydome->Draw(m_d3dContext.Get(), m_states, Matrix::Identity, m_view, m_proj);
 
-	//モデル（ボール）の描画
-	for (int i = 0; i < Ball_Number; i++)
-	{
-		m_modelBall[i]->Draw(m_d3dContext.Get(), m_states, m_worldBall[i], m_view, m_proj);
-	}
+	//モデル（頭）の描画
+	m_modelHead->Draw(m_d3dContext.Get(), m_states, tank_world, m_view, m_proj);
+
+	////モデル（ティーポット）の描画
+	//for (int i = 0; i < Teapot_Number; i++)
+	//{
+	//	m_modelTeapot[i]->Draw(m_d3dContext.Get(), m_states, m_worldTeapot[i], m_view, m_proj);
+	//}
 
 	m_batch->Begin();
 	VertexPositionColor v1(Vector3(0.f, 0.5f, 0.5f), Colors::Yellow);

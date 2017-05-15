@@ -12,7 +12,9 @@
 #include <SimpleMath.h>
 #include <Model.h>
 #include "DebugCamera.h"
+#include "FollowCamera.h"
 #include <Keyboard.h>
+#include <SimpleMath.h>
 
 const int Ball_Number = 20;
 const int Teapot_Number = 20;
@@ -132,4 +134,7 @@ private:
 
 	//自機のワールド行列
 	DirectX::SimpleMath::Matrix tank_world;
+
+	//カメラ
+	std::unique_ptr<FollowCamera> m_Camera;
 };

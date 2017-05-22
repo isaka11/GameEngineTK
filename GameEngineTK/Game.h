@@ -15,6 +15,8 @@
 #include "FollowCamera.h"
 #include <Keyboard.h>
 #include <SimpleMath.h>
+#include <vector>
+#include "Obj3d.h"
 
 const int Ball_Number = 20;
 const int Teapot_Number = 20;
@@ -90,7 +92,7 @@ private:
 	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionNormal>> m_batch;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
 
-	DirectX::SimpleMath::Matrix m_world;
+	//DirectX::SimpleMath::Matrix m_world;
 	DirectX::SimpleMath::Matrix m_view;
 	DirectX::SimpleMath::Matrix m_proj;
 
@@ -113,8 +115,8 @@ private:
 	//モデル(ティーポット)
 	std::unique_ptr<DirectX::Model> m_modelTeapot[Teapot_Number];
 
-	//モデル(頭)
-	std::unique_ptr<DirectX::Model> m_modelHead;
+	////モデル(頭)
+	//std::unique_ptr<DirectX::Model> m_modelHead;
 
 	//ボールのワールド行列
 	DirectX::SimpleMath::Matrix m_worldBall[Ball_Number];
@@ -123,7 +125,6 @@ private:
 	DirectX::SimpleMath::Matrix m_worldTeapot[Teapot_Number];
 
 	//地面のワールド行列
-	//DirectX::SimpleMath::Matrix m_worldGraund[Max_Graund][Max_Graund];
 	DirectX::SimpleMath::Matrix m_worldGraund;
 
 	//キーボード
@@ -132,8 +133,17 @@ private:
 	//自機の座標
 	DirectX::SimpleMath::Vector3 tank_pos;
 
-	//自機のワールド行列
+	//自機のワールド行列1
 	DirectX::SimpleMath::Matrix tank_world;
+
+	//自機のワールド行列2
+	DirectX::SimpleMath::Matrix tank_world2;
+
+	//自機の3Dオブジェクト
+	Obj3d m_ObjPlayer1;
+	Obj3d m_ObjPlayer2;
+
+	//std::vector<Obj3d> m_ObjPlayer;
 
 	//カメラ
 	std::unique_ptr<FollowCamera> m_Camera;

@@ -32,6 +32,8 @@ void Game::Initialize(HWND window, int width, int height)
 
 	CreateResources();
 
+
+
 	// TODO: Change the timer settings if you want something other than the default variable timestep mode.
 	// e.g. for 60 FPS fixed timestep update logic, call:
 	/*
@@ -40,6 +42,18 @@ void Game::Initialize(HWND window, int width, int height)
 	*/
 
 	//初期化はここに書く
+	//キーボードの初期化
+	keyboard = std::make_unique<Keyboard>();
+
+	//カメラの生成
+	m_Camera = std::make_unique<FollowCamera>(m_outputWidth, m_outputHeight);
+
+	//カメラにキーボードをセット
+	m_Camera->SetKeyboard(keyboard.get());
+
+	//3Dオブジェクトの静的メンバを初期化
+	Obj3d::InitializeStatic(m_d3dDevice, m_d3dContext, m_Camera.get());
+
 	m_time = 0.0f;
 	m_time2 = 0.0f;
 	m_timeflag = 0;
@@ -92,20 +106,14 @@ void Game::Initialize(HWND window, int width, int height)
 	//モデルの読み込み、生成
 	m_modelSkydome = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Skydome.cmo", *m_factory);
 
-	//モデルの読み込み、生成
-	m_modelHead = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Head.cmo", *m_factory);
+	////モデルの読み込み、生成
+	//m_modelHead = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Head.cmo", *m_factory);
 
 	////モデルの読み込み、生成
 	//for (int i = 0; i < Teapot_Number; i++)
 	//{
 	//	m_modelTeapot[i] = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Teapot.cmo", *m_factory);
 	//}
-
-	//キーボードの初期化
-	keyboard = std::make_unique<Keyboard>();
-
-	//カメラの生成
-	m_Camera = std::make_unique<FollowCamera>(m_outputWidth, m_outputHeight);
 }
 
 // Executes the basic game loop.
@@ -262,8 +270,8 @@ void Game::Update(DX::StepTimer const& timer)
 	//平行移動
 	Matrix transmat2 = Matrix::CreateTranslation(0.0f, 0.0f, 0.0f);
 
-	//ワールド行列の合成
-	m_world = scalemat2 * rotmat2 * transmat2;
+	////ワールド行列の合成
+	//m_world = scalemat2 * rotmat2 * transmat2;
 
 	//キーボードの状態取得
 	Keyboard::State g_key = keyboard->GetState();
@@ -307,16 +315,19 @@ void Game::Update(DX::StepTimer const& timer)
 	}
 
 	//自機のワールド行列を計算
-
-	//ヨー（方位角）
+	//パーツ1（親）
 	Matrix rotmat = Matrix::CreateRotationY(m_Spin_Angle);
-
 	Matrix transmat = Matrix::CreateTranslation(tank_pos);
 
-	////ワールド行列の合成
-	//m_worldGraund = scalemat * rotmat * transmat;
-
+	//ワールド行列を合成
 	tank_world = rotmat * transmat;
+
+	//パーツ2（子）
+	Matrix rotmat3 = Matrix::CreateRotationZ(XM_PIDIV2) *  Matrix::CreateRotationY(0);
+	Matrix transmat3 = Matrix::CreateTranslation(Vector3(0.0f,0.5f, 0.0f));
+
+	//ワールド行列を合成
+	tank_world2 = rotmat3 * transmat3 * tank_world;
 }
 
 // Draws the scene.
@@ -356,11 +367,11 @@ void Game::Render()
 	m_d3dContext->OMSetDepthStencilState(m_states.DepthNone(), 0);
 	m_d3dContext->RSSetState(m_states.CullNone());
 
-	m_effect->SetView(m_view);
-	m_effect->SetProjection(m_proj);
-	m_effect->SetWorld(m_world);
+	//m_effect->SetView(m_view);
+	//m_effect->SetProjection(m_proj);
+	//m_effect->SetWorld(m_world);
 
-	m_effect->Apply(m_d3dContext.Get());
+	//m_effect->Apply(m_d3dContext.Get());
 	m_d3dContext->IASetInputLayout(m_inputLayout.Get());
 
 	//モデル（地面）の描画
@@ -369,8 +380,14 @@ void Game::Render()
 	//モデル（天球）の描画
 	m_modelSkydome->Draw(m_d3dContext.Get(), m_states, Matrix::Identity, m_view, m_proj);
 
-	//モデル（頭）の描画
-	m_modelHead->Draw(m_d3dContext.Get(), m_states, tank_world, m_view, m_proj);
+	////モデル（頭）の描画1
+	//m_modelHead->Draw(m_d3dContext.Get(), m_states, tank_world, m_view, m_proj);
+
+	////モデル（頭）の描画2
+	//m_modelHead->Draw(m_d3dContext.Get(), m_states, tank_world2, m_view, m_proj);
+
+	m_ObjPlayer1.Draw();
+	m_ObjPlayer2.Draw();
 
 	////モデル（ティーポット）の描画
 	//for (int i = 0; i < Teapot_Number; i++)

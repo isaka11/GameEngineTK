@@ -51,31 +51,52 @@ public:
 
 	//setter
 	//スケーリング(X Y Z)
+	void SetScale(const DirectX::SimpleMath::Vector3&	scale) { m_scale = scale; }
 
 	//回転角(X Y Z)
+	void SetRotation(const DirectX::SimpleMath::Vector3& rotation) { m_rotation = rotation; }
 
 	//平行移動(X Y Z)
+	void SetTranslation(const DirectX::SimpleMath::Vector3& translation) { m_translation = translation; }
+
+	//親の3Dオブジェクトのポインタ
+	void SetParent(Obj3d* parent) { m_parent = parent; }
 
 	//getter
 	//スケーリング(X Y Z)
+	const DirectX::SimpleMath::Vector3& GetScale() { return m_scale; }
 
 	//回転角(X Y Z)
+	const DirectX::SimpleMath::Vector3& GetRotation() { return m_rotation; }
 
 	//平行移動(X Y Z)
+	const DirectX::SimpleMath::Vector3& GetTranslation() { return m_translation; }
 
 	//ワールド行列
+	const DirectX::SimpleMath::Matrix& GetWorld() { return m_world; }
 
+	//親の3Dオブジェクトのポインタ
+	Obj3d* GetParent() { return m_parent; }
 
 private:
 	//メンバ変数
 	//3Dモデル
 
+	//モデル
+	std::unique_ptr<DirectX::Model> m_model;
+
 	//スケーリング(X Y Z)
+	DirectX::SimpleMath::Vector3	m_scale;
 
 	//回転角(X Y Z)
+	DirectX::SimpleMath::Vector3	m_rotation;
 
 	//平行移動(X Y Z)
+	DirectX::SimpleMath::Vector3	m_translation;
 
 	//ワールド行列
+	DirectX::SimpleMath::Matrix		m_world;
 
+	//親の3Dオブジェクトのポインタ
+	Obj3d* m_parent;
 };

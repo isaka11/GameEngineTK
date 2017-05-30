@@ -27,6 +27,19 @@ const int Max_Graund = 200;
 class Game
 {
 public:
+	
+	//自機パーツ
+	enum PLAYERPARTS
+	{
+		TANK,
+		BODY,
+		BODY2,
+		ARM,
+		ARM2,
+		WEAPON,
+
+		PLAYER_PARTS_NUM
+	};
 
     Game();
 
@@ -102,12 +115,11 @@ private:
 	//エフェクトファクトリ
 	std::unique_ptr<DirectX::EffectFactory> m_factory;
 
-	//モデル(地面)
-	//std::unique_ptr<DirectX::Model> m_modelGround[Max_Graund][Max_Graund];
-	std::unique_ptr<DirectX::Model> m_modelGround;
-
 	//モデル(天球)
-	std::unique_ptr<DirectX::Model> m_modelSkydome;
+	Obj3d m_objSkydome;
+
+	//モデル(地面)
+	std::unique_ptr<DirectX::Model> m_modelGround;
 
 	//モデル(ボール)
 	std::unique_ptr<DirectX::Model> m_modelBall[Ball_Number];
@@ -139,12 +151,21 @@ private:
 	//自機のワールド行列2
 	DirectX::SimpleMath::Matrix tank_world2;
 
-	//自機の3Dオブジェクト
-	Obj3d m_ObjPlayer1;
-	Obj3d m_ObjPlayer2;
+	////自機の3Dオブジェクト
+	//Obj3d m_ObjPlayer;
 
-	//std::vector<Obj3d> m_ObjPlayer;
+	//自機の3Dオブジェクト
+	std::vector<Obj3d> m_ObjPlayer;
+
+	//サイン用の引数となる角度
+	float sinAngle;
+
+
+	//Obj3d m_ObjPlayer1;
+	//Obj3d m_ObjPlayer2;
 
 	//カメラ
 	std::unique_ptr<FollowCamera> m_Camera;
+
+
 };

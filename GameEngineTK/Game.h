@@ -13,14 +13,17 @@
 #include <Model.h>
 #include "DebugCamera.h"
 #include "FollowCamera.h"
-#include <Keyboard.h>
+
 #include <SimpleMath.h>
 #include <vector>
 #include "Obj3d.h"
+#include "Player.h"
+#include "Enemy.h"
 
 const int Ball_Number = 20;
 const int Teapot_Number = 20;
 const int Max_Graund = 200;
+const int Enemy_Num = 5;
 
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
@@ -28,18 +31,19 @@ class Game
 {
 public:
 	
-	//自機パーツ
-	enum PLAYERPARTS
-	{
-		TANK,
-		BODY,
-		BODY2,
-		ARM,
-		ARM2,
-		WEAPON,
+	////自機パーツ
+	//enum PLAYERPARTS
+	//{
+	//	BODY,
+	//	L_WING,
+	//	R_WING,
+	//	L_ENGINE,
+	//	R_ENGINE,
+	//	L_WEAPON,
+	//	R_WEAPON,
 
-		PLAYER_PARTS_NUM
-	};
+	//	PLAYER_PARTS_NUM
+	//};
 
     Game();
 
@@ -60,6 +64,11 @@ public:
     void GetDefaultSize( int& width, int& height ) const;
 
 private:
+	//プレイヤーの生成
+	Player* player;
+
+	//エネミーの生成
+	Enemy* enemy[Enemy_Num];
 
     void Update(DX::StepTimer const& timer);
     void Render();
@@ -121,51 +130,21 @@ private:
 	//モデル(地面)
 	std::unique_ptr<DirectX::Model> m_modelGround;
 
-	//モデル(ボール)
-	std::unique_ptr<DirectX::Model> m_modelBall[Ball_Number];
+	////モデル(ボール)
+	//std::unique_ptr<DirectX::Model> m_modelBall[Ball_Number];
 
-	//モデル(ティーポット)
-	std::unique_ptr<DirectX::Model> m_modelTeapot[Teapot_Number];
+	////モデル(ティーポット)
+	//std::unique_ptr<DirectX::Model> m_modelTeapot[Teapot_Number];
 
-	////モデル(頭)
-	//std::unique_ptr<DirectX::Model> m_modelHead;
+	////ボールのワールド行列
+	//DirectX::SimpleMath::Matrix m_worldBall[Ball_Number];
 
-	//ボールのワールド行列
-	DirectX::SimpleMath::Matrix m_worldBall[Ball_Number];
-
-	//ティーポットのワールド行列
-	DirectX::SimpleMath::Matrix m_worldTeapot[Teapot_Number];
+	////ティーポットのワールド行列
+	//DirectX::SimpleMath::Matrix m_worldTeapot[Teapot_Number];
 
 	//地面のワールド行列
 	DirectX::SimpleMath::Matrix m_worldGraund;
 
-	//キーボード
-	std::unique_ptr<DirectX::Keyboard> keyboard;
-
-	//自機の座標
-	DirectX::SimpleMath::Vector3 tank_pos;
-
-	//自機のワールド行列1
-	DirectX::SimpleMath::Matrix tank_world;
-
-	//自機のワールド行列2
-	DirectX::SimpleMath::Matrix tank_world2;
-
-	////自機の3Dオブジェクト
-	//Obj3d m_ObjPlayer;
-
-	//自機の3Dオブジェクト
-	std::vector<Obj3d> m_ObjPlayer;
-
-	//サイン用の引数となる角度
-	float sinAngle;
-
-
-	//Obj3d m_ObjPlayer1;
-	//Obj3d m_ObjPlayer2;
-
 	//カメラ
 	std::unique_ptr<FollowCamera> m_Camera;
-
-
 };

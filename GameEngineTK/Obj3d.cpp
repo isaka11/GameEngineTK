@@ -59,7 +59,7 @@ void Obj3d::Update()
 	//âÒì]çsóÒ
 	Matrix rotmatZ = Matrix::CreateRotationZ(m_rotation.z);
 	Matrix rotmatY = Matrix::CreateRotationY(m_rotation.y);
-	Matrix rotmatX = Matrix::CreateRotationY(m_rotation.x);
+	Matrix rotmatX = Matrix::CreateRotationX(m_rotation.x);
 
 	Matrix rotmat = rotmatZ * rotmatX * rotmatY;
 

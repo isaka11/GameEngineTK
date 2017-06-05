@@ -54,12 +54,6 @@ void FollowCamera::Update()
 
 		//視点座標を計算
 		eyepos = refpos + cameraV;
-
-		//視点を現在位置から補間する
-		eyepos = m_eyepos + (eyepos - m_eyepos) * 0.05f;
-
-		//参照点を現在位置から補間する
-		refpos = m_refpos + (refpos - m_refpos) * 0.2f;
 	}
 
 	////FPSカメラ
@@ -68,7 +62,8 @@ void FollowCamera::Update()
 		//自機の目の位置を視点にする
 		Vector3 position;
 
-		//eyepos = m_target_pos + Vector3(0, 0.3f, 0);
+		eyepos = m_target_pos + Vector3(0, 0.3f, 0);
+
 		position = m_target_pos + Vector3(0, 0.3f, 0);
 
 		//参照点と視点の差分ベクトル
@@ -80,11 +75,14 @@ void FollowCamera::Update()
 		//差分ベクトルを回転させる
 		cameraV = Vector3::TransformNormal(cameraV, rotmat);
 
-		eyepos = position + cameraV * 0.1f;
-
 		//参照点座標を計算
 		refpos = eyepos + cameraV;
 	}
+	//視点を現在位置から補間する
+	eyepos = m_eyepos + (eyepos - m_eyepos) * 0.05f;
+
+	//参照点を現在位置から補間する
+	refpos = m_refpos + (refpos - m_refpos) * 0.20f;
 
 	SetEyePos(eyepos);
 	SetRefPos(refpos);

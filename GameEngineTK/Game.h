@@ -30,20 +30,6 @@ const int Enemy_Num = 5;
 class Game
 {
 public:
-	
-	////自機パーツ
-	//enum PLAYERPARTS
-	//{
-	//	BODY,
-	//	L_WING,
-	//	R_WING,
-	//	L_ENGINE,
-	//	R_ENGINE,
-	//	L_WEAPON,
-	//	R_WEAPON,
-
-	//	PLAYER_PARTS_NUM
-	//};
 
     Game();
 

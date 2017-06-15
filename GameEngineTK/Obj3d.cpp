@@ -40,6 +40,9 @@ Obj3d::Obj3d()
 	//スケールは1倍がデフォルト
 	m_scale = Vector3(1.0f, 1.0f, 1.0f);
 
+	//デフォルトではオイラー角で計算
+	m_UseQuaternion = false;
+
 	m_parent = nullptr;
 }
 
@@ -56,12 +59,20 @@ void Obj3d::Update()
 	//スケーリング行列
 	Matrix scalemat = Matrix::CreateScale(m_scale);
 
-	//回転行列
-	Matrix rotmatZ = Matrix::CreateRotationZ(m_rotation.z);
-	Matrix rotmatY = Matrix::CreateRotationY(m_rotation.y);
-	Matrix rotmatX = Matrix::CreateRotationX(m_rotation.x);
+	Matrix rotmat;
 
-	Matrix rotmat = rotmatZ * rotmatX * rotmatY;
+	//回転行列
+	if (m_UseQuaternion)
+	{//クォータニオンで回転を計算
+		rotmat = Matrix::CreateFromQuaternion(m_rotationQ);
+	}
+	else
+	{//オイラー角で回転を計算(Z→X→Y)
+		Matrix rotmatZ = Matrix::CreateRotationZ(m_rotation.z);
+		Matrix rotmatY = Matrix::CreateRotationY(m_rotation.y);
+		Matrix rotmatX = Matrix::CreateRotationX(m_rotation.x);
+		rotmat = rotmatZ * rotmatX * rotmatY;
+	}
 
 	//平行移動行列
 	Matrix transmat = Matrix::CreateTranslation(m_translation);

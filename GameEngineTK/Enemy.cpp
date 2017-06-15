@@ -70,6 +70,14 @@ void Enemy::Initialize()
 
 	//目標角度の初期化
 	m_DistAngle = 0.0f;
+
+	//初期位置の設定
+	Vector3 pos;
+	pos.x = rand() % 10;
+	pos.y= 2;
+	pos.z = rand() % 10;
+
+	this->SetTrans(pos);
 }
 
 //更新処理
@@ -77,12 +85,6 @@ void Enemy::Update()
 {
 	//ロボットの挙動の更新
 	this->Action();
-
-	//各パーツの更新
-	for (std::vector<Obj3d>::iterator it = m_ObjEnemy.begin(); it != m_ObjEnemy.end(); it++)
-	{
-		it->Update();
-	}
 
 	//定期的に進行方向を変える
 	m_Timer--;	//メンバ変数でタイマーを作り、カウントダウン
@@ -96,17 +98,44 @@ void Enemy::Update()
 		float rnd = (float)rand() / RAND_MAX - 0.5f;
 		rnd *= 180.0f;
 
+		rnd = XMConvertToRadians(rnd);
+
 		//メンバ変数で目標角度を保持
 		m_DistAngle += rnd;
 	}
 
+	//Vector3 angle = m_ObjEnemy[BODY].GetRotation();
+	/*SetRot(Vector3(0, m_DistAngle, 0));*/
+
 	//目標角度に向かって、機体の角度を補間する
 	{
+		//敵の角度を回転させる
 		Vector3 rotv = m_ObjEnemy[BODY].GetRotation();
+
 		////目標角度への、最短角度を取得
 		//float angle = GetShortAngleRad(rotv.y, XMConvertToRadians(m_DistAngle));
-		//rotv.y += angle * 0.01f;
-		m_ObjEnemy[BODY].SetRotation(rotv);
+		
+		
+		float angle = m_DistAngle - rotv.y;
+
+		//180度を超える場合、逆回りにする
+		if (angle > XM_PI)
+		{
+			angle -= XM_2PI;
+		}
+
+		if (angle < -XM_PI)
+		{
+			angle += XM_2PI;
+		}
+
+
+		//補間
+		rotv.y += angle * 0.01f;
+
+		SetRot(rotv);
+
+		//m_ObjEnemy[BODY].SetRotation(rotv);
 	}
 
 	//機体の向いている方向に進む
@@ -126,8 +155,22 @@ void Enemy::Update()
 		m_ObjEnemy[BODY].SetTranslation(trans);
 	}
 
+	//各パーツの更新
+	for (std::vector<Obj3d>::iterator it = m_ObjEnemy.begin(); it != m_ObjEnemy.end(); it++)
+	{
+		it->Update();
+	}
 	////移動を反映して行列更新
 	//Calc();
+}
+
+//行列更新
+void Enemy::Calc()
+{
+	//for (std::vector<Obj3d>::iterator it = m_ObjEnemy.begin(); it != m_ObjEnemy.end(); it++)
+	//{
+	//	it->Update();
+	//}
 }
 
 //描画

@@ -16,6 +16,9 @@ public:
 	//更新処理
 	void Update();
 
+	//行列の計算
+	void Calc();
+
 	//描画処理
 	void Draw();
 

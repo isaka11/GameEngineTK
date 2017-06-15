@@ -19,6 +19,12 @@ public:
 	//描画処理
 	void Draw();
 
+	//ミサイルを発射する関数
+	void FireBullet();
+
+	//ミサイルを再装填する関数
+	void ResetBullet();
+
 	//プレイヤーの挙動
 	void Action();
 
@@ -46,7 +52,11 @@ private:
 
 	//ミサイル攻撃を管理するフラグ
 	bool m_weapon_flag;
-	bool m_a_flag;
+	float m_timer;
+
+	//ミサイルの速度ベクトル
+	DirectX::SimpleMath::Vector3 m_BulletVel_l;
+	DirectX::SimpleMath::Vector3 m_BulletVel_r;
 
 	//自機パーツ
 	enum PLAYERPARTS

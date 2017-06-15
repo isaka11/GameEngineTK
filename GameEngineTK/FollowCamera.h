@@ -4,7 +4,7 @@
 #pragma once
 #include "Camera.h"
 #include <Keyboard.h>
-
+#include "Player.h"
 
 class FollowCamera : public Camera
 {
@@ -14,7 +14,7 @@ protected:
 	float m_target_angle;												//追従対象の回転角
 	DirectX::Keyboard* m_keyboard;										//キーボード
 	DirectX::Keyboard::KeyboardStateTracker m_keyboardTracker;			//キーボードトラッカー
-	bool m_isFPS;
+	bool m_isFPS;														//FPSカメラフラグ
 
 public:
 	static const float CAMERA_DISTANCE;									//自機とカメラの距離

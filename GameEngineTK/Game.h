@@ -50,11 +50,23 @@ public:
     void GetDefaultSize( int& width, int& height ) const;
 
 private:
-	//プレイヤーの生成
-	Player* player;
+	////プレイヤーの生成
+	//Player* player;
 
-	//エネミーの生成
-	Enemy* enemy[Enemy_Num];
+	//std::unique_ptr<Player> player;
+
+	////エネミーの生成
+	//Enemy* enemy[Enemy_Num];
+
+	//std::unique_ptr<Enemy> enemy;
+
+
+	// プレイヤー
+	std::unique_ptr<Player> m_Player;
+
+	// 敵
+	std::vector<std::unique_ptr<Enemy>> m_Enemies;
+
 
     void Update(DX::StepTimer const& timer);
     void Render();
@@ -133,4 +145,7 @@ private:
 
 	//カメラ
 	std::unique_ptr<FollowCamera> m_Camera;
+
+	// キーボード
+	std::unique_ptr<DirectX::Keyboard> keyboard;
 };

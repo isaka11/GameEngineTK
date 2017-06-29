@@ -4,7 +4,7 @@
 
 #include "pch.h"
 #include "Game.h"
-#include <SimpleMath.h>
+#include "ModelEffect.h"
 
 extern void ExitGame();
 
@@ -32,7 +32,6 @@ void Game::Initialize(HWND window, int width, int height)
 
 	CreateResources();
 
-
 	// TODO: Change the timer settings if you want something other than the default variable timestep mode.
 	// e.g. for 60 FPS fixed timestep update logic, call:
 	/*
@@ -41,30 +40,34 @@ void Game::Initialize(HWND window, int width, int height)
 	*/
 
 	//初期化はここに書く
-	////キーボードの初期化
-	//keyboard = std::make_unique<Keyboard>();
-
 	//カメラの生成
 	m_Camera = std::make_unique<FollowCamera>(m_outputWidth, m_outputHeight);
 
 	//3Dオブジェクトの静的メンバを初期化
 	Obj3d::InitializeStatic(m_d3dDevice, m_d3dContext, m_Camera.get());
 
-	//プレイヤーの生成
-	player = new Player();
+	keyboard = std::make_unique<Keyboard>();
 
-	//プレイヤーの初期化
-	player->Initialize();
+	// プレイヤーの生成
+	m_Player = std::make_unique<Player>(keyboard.get());
+	m_Player->Initialize();
 
-	//エネミーの生成と初期化
-	for (int i = 0; i < Enemy_Num; i++)
+
+	// 敵の生成
+	int enemyNum = rand() % 10 + 1;
+	m_Enemies.resize(enemyNum);
+
+	for (int i = 0; i < enemyNum; i++)
 	{
-		enemy[i] = new Enemy();
-		enemy[i]->Initialize();
+		m_Enemies[i] = std::make_unique<Enemy>();
+		m_Enemies[i]->Initialize();
 	}
 
 	//カメラにキーボードをセット
-	m_Camera->SetKeyboard(player->GetKeyboard());
+	m_Camera->SetKeyboard(keyboard.get());
+
+	// カメラにプレイヤーをセット
+	m_Camera->SetPlayer(m_Player.get());
 
 	m_batch = std::make_unique<PrimitiveBatch<VertexPositionNormal>>(m_d3dContext.Get());
 
@@ -90,13 +93,6 @@ void Game::Initialize(HWND window, int width, int height)
 		VertexPositionColor::InputElementCount,
 		shaderByteCode, byteCodeLength,
 		m_inputLayout.GetAddressOf());
-
-	////ティーポットの位置をランダムで決める
-	//for (int i = 0; i < Teapot_Number; i++)
-	//{
-	//	m_Height_pos[i] = rand() % 50 - 25;
-	//	m_Width_pos[i] = rand() % 50 - 25;
-	//}
 
 	//デバッグカメラの生成
 	m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth, m_outputHeight);
@@ -139,27 +135,79 @@ void Game::Update(DX::StepTimer const& timer)
 	////ビュー行列を取得
 	//m_view = m_debugCamera->GetCameraMatrix();
 
+	//エネミーの更新処理
+	for (std::vector<std::unique_ptr<Enemy>>::iterator it = m_Enemies.begin();
+		it != m_Enemies.end();
+		it++)
+	{
+		(*it)->Update();
+	}
+
+	//プレイヤーの更新処理
+	m_Player->Update();
+
+	{//弾丸と敵の当たり判定
+
+	 //ミサイルの判定球を取得
+		const Sphere& bullet_lSphere = m_Player->GetCollisionNodeBullet_l();
+		const Sphere& bullet_rSphere = m_Player->GetCollisionNodeBullet_r();
+
+		//敵の数だけ処理する
+		for (std::vector<std::unique_ptr<Enemy>>::iterator it = m_Enemies.begin();
+			it != m_Enemies.end();
+			)
+		{
+			Enemy* enemy = it->get();
+			//敵の判定球を取得
+			const Sphere& Enemy_Sphere = enemy->GetCollisionNodeEnemy();
+
+			Vector3 inter;
+
+			//2つの球が当たっていたら
+			if (CheakSphere2Sphere(bullet_lSphere, Enemy_Sphere) || CheakSphere2Sphere(bullet_rSphere, Enemy_Sphere))
+			{
+				//エフェクトの表示
+				ModelEffectManager::getInstance()->Entry(
+					L"Resources/HitEffect.cmo", 
+					10,					// 寿命フレーム数
+					enemy->GetTrans(),	// 座標
+					Vector3(0, 0, 0),	// 速度
+					Vector3(0, 0, 0),	// 加速度
+					Vector3(0, 0, 0),	// 回転角（初期）
+					Vector3(0, 0, 0),	// 回転角（最終）
+					Vector3(0, 0, 0),	// スケール（初期）
+					Vector3(6, 6, 6)	// スケール（最終）
+				);
+
+				//敵を倒す
+				//eraseした要素の次の要素を指すイテレータ
+ 				it = m_Enemies.erase(it);
+			}
+			else
+			{
+				//イテレータを1つ進める
+				it++;
+			}
+
+			//敵が0体になったら
+			if (m_Enemies.size() == 0)
+			{
+				ExitProcess(0);
+				ExitGame();
+			}
+		}
+	}
+
 	{//自機に追従するカメラ
-	m_Camera->SetTargetPos(player->GetTrans());
-
-	m_Camera->SetTargetAngle(player->GetRot().y);
-
-	//カメラの更新
-	m_Camera->Update();
-	m_view = m_Camera->GetView();
-	m_proj = m_Camera->GetProj();
+		//カメラの更新
+		m_Camera->Update();
+		m_view = m_Camera->GetView();
+		m_proj = m_Camera->GetProj();
 	}
 
 	m_objSkydome.Update();
 
-	//プレイヤーの更新処理
-	player->Update();
-
-	//エネミーの更新
-	for (int i = 0; i < Enemy_Num; i++)
-	{
-		enemy[i]->Update();
-	}
+	ModelEffectManager::getInstance()->Update();
 }
 
 // Draws the scene.
@@ -205,13 +253,17 @@ void Game::Render()
 	m_objSkydome.Draw();
 
 	//プレイヤーの描画
-	player->Draw();
+	m_Player->Draw();
 
 	//エネミーの描画
-	for (int i = 0; i < Enemy_Num; i++)
+	for (std::vector<std::unique_ptr<Enemy>>::iterator it = m_Enemies.begin();
+		it != m_Enemies.end();
+		it++)
 	{
-		enemy[i]->Draw();
+		(*it)->Draw();
 	}
+
+	ModelEffectManager::getInstance()->Draw();
 
 	m_batch->Begin();
 	VertexPositionColor v1(Vector3(0.f, 0.5f, 0.5f), Colors::Yellow);

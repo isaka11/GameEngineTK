@@ -5,9 +5,11 @@ using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
 //コンストラクタ
-Player::Player()
+Player::Player(DirectX::Keyboard* keyboard)
 {
-
+	m_pKeyboard = keyboard;
+	m_sinAngle = 0.0f;
+	Initialize();
 }
 
 //デストラクタ
@@ -19,9 +21,6 @@ Player::~Player()
 //初期化処理
 void Player::Initialize()
 {
-	//キーボードの初期化
-	keyboard = std::make_unique<Keyboard>();
-
 	//自機パーツの読み込み
 	m_ObjPlayer.resize(PLAYER_PARTS_NUM);
 	m_ObjPlayer[BODY].LoadModel(L"Resources/body.cmo");
@@ -69,19 +68,48 @@ void Player::Initialize()
 	m_ObjPlayer[R_WEAPON].SetScale(Vector3(0.75f, 0.75f, 0.6f));
 
 	m_weapon_flag = false;
+
+	{//弾丸用の当たり判定を設定する
+		m_CollisionNodeBullet_l.Initialize();
+
+		m_CollisionNodeBullet_l.SetParent(&m_ObjPlayer[L_WEAPON]);
+		m_CollisionNodeBullet_l.SetTrans(Vector3(0, 0, 0));
+		m_CollisionNodeBullet_l.SetLocalRadius(0.5f);
+
+		m_CollisionNodeBullet_r.Initialize();
+
+		m_CollisionNodeBullet_r.SetParent(&m_ObjPlayer[R_WEAPON]);
+		m_CollisionNodeBullet_r.SetTrans(Vector3(0, 0, 0));
+		m_CollisionNodeBullet_r.SetLocalRadius(0.5f);
+	}
 }
 
 //更新処理
 void Player::Update()
 {
+	// キーボードの更新
+	Keyboard::State keystate = m_pKeyboard->GetState();
+	m_KeyboardTracker.Update(keystate);
+
 	//ロボットの挙動の更新
 	this->Action();
 
-	//各パーツの更新
-	for (std::vector<Obj3d>::iterator it = m_ObjPlayer.begin(); it != m_ObjPlayer.end(); it++)
+	Calc();
+}
+
+//行列更新
+void Player::Calc()
+{
+	for (std::vector<Obj3d>::iterator it = m_ObjPlayer.begin();
+		it != m_ObjPlayer.end();
+		it++)
 	{
 		it->Update();
 	}
+
+	// 当たり判定の更新
+	m_CollisionNodeBullet_l.Update();
+	m_CollisionNodeBullet_r.Update();
 }
 
 //描画
@@ -92,6 +120,10 @@ void Player::Draw()
 	{
 		it->Draw();
 	}
+
+	//当たり判定の描画
+	m_CollisionNodeBullet_l.Draw();
+	m_CollisionNodeBullet_r.Draw();
 }
 
 //ミサイルを発射する関数
@@ -178,8 +210,11 @@ void Player::Action()
 	Vector3 r_angle = m_ObjPlayer[R_ENGINE].GetRotation();
 	m_ObjPlayer[R_ENGINE].SetRotation(r_angle + Vector3(0, 0, 0.05f));
 
-	//キーボードの状態取得
-	Keyboard::State g_key = keyboard->GetState();
+
+	// キーボードの更新
+	Keyboard::State keystate = m_pKeyboard->GetState();
+	m_KeyboardTracker.Update(keystate);
+
 	//移動ベクトル（Z座標）
 	Vector3 moveV(0, 0, -0.1f);
 
@@ -193,7 +228,7 @@ void Player::Action()
 	m_ObjPlayer[BODY].SetTranslation(pos + moveV);
 
 	//Wキーを押すと
-	if (g_key.W)
+	if (keystate.W)
 	{
 		Vector3 angle = m_ObjPlayer[BODY].GetRotation();
 		angle.x += 0.03f;
@@ -202,7 +237,7 @@ void Player::Action()
 	}
 
 	//Sキーを押すと
-	if (g_key.S)
+	if (keystate.S)
 	{
 		Vector3 angle = m_ObjPlayer[BODY].GetRotation();
 		angle.x -= 0.03f;
@@ -211,7 +246,7 @@ void Player::Action()
 	}
 
 	//Aキーを押すと
-	if (g_key.A)
+	if (keystate.A)
 	{
 		Vector3 angle = m_ObjPlayer[BODY].GetRotation();
 		angle.y += 0.03f;
@@ -220,7 +255,7 @@ void Player::Action()
 	}
 
 	//Dキーを押すと
-	if (g_key.D)
+	if (keystate.D)
 	{
 		Vector3 angle = m_ObjPlayer[BODY].GetRotation();
 		angle.y -= 0.03f;
@@ -229,7 +264,7 @@ void Player::Action()
 	}
 
 	//Spaceキーを押すと
-	if (g_key.Space)
+	if (keystate.Space)
 	{
 		if (m_weapon_flag)
 		{
@@ -243,7 +278,7 @@ void Player::Action()
 		}
 	}
 
-	if (g_key.Space && m_timer / 60.0f > 0.0f)
+	if (keystate.Space && m_timer / 60.0f > 0.0f)
 	{
 		ResetBullet();
 	}
@@ -264,12 +299,6 @@ void Player::Action()
 		m_ObjPlayer[L_WEAPON].SetTranslation(pos_l + m_BulletVel_l);
 		m_ObjPlayer[R_WEAPON].SetTranslation(pos_r + m_BulletVel_r);
 	}
-}
-
-//キー情報を取得する
-DirectX::Keyboard* Player::GetKeyboard()
-{
-	return keyboard.get();
 }
 
 //プレイヤーの移動を取得する

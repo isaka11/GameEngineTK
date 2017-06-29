@@ -4,8 +4,10 @@
 
 #include "pch.h"
 #include "Game.h"
+#include "Collision.h"
 
 using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 namespace
 {
@@ -24,6 +26,32 @@ extern "C"
 // Entry point
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
+	////球A
+	//Sphere sphereA;
+
+	////Aの中心座標
+	//sphereA.Center = Vector3(1.0f, 0.0f, 0.0f);
+
+	////Aの半径
+	//sphereA.Radius = 2.0f;
+
+	//Sphere sphereB;
+
+	//sphereB.Center = Vector3(-1.0f, 0.0f, 0.0f);
+
+	//sphereB.Radius = 2.0f;
+
+	//bool hit = CheakSphere2Sphere(sphereA, sphereB);
+
+	//if (hit)
+	//{
+	//	OutputDebugString(L"当たった！\n");
+	//}
+	//else
+	//{
+	//	OutputDebugString(L"当たっていない！\n");
+	//}
+
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 

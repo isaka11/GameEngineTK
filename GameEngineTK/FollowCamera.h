@@ -15,6 +15,7 @@ protected:
 	DirectX::Keyboard* m_keyboard;										//キーボード
 	DirectX::Keyboard::KeyboardStateTracker m_keyboardTracker;			//キーボードトラッカー
 	bool m_isFPS;														//FPSカメラフラグ
+	Player* m_player;													// プレイヤー
 
 public:
 	static const float CAMERA_DISTANCE;									//自機とカメラの距離
@@ -22,6 +23,6 @@ public:
 	void Update() override;												//更新処理
 	void SetTargetPos(const DirectX::SimpleMath::Vector3& targetpos);	//追従対象の座標をセット
 	void SetTargetAngle(float targetangle);								//追従対象の角度をセット
-
 	void SetKeyboard(DirectX::Keyboard* keyboard);						//キーボードをセット
+	void SetPlayer(Player* player) { m_player = player; }				// プレイヤーをセット
 };

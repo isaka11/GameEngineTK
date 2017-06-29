@@ -1,14 +1,16 @@
 #pragma once
 
 #include <d3d11.h>
-#include <Keyboard.h>
+#include <SimpleMath.h>
 #include <vector>
 #include "Obj3d.h"
+#include "CollisionNode.h"
 
 class Enemy : public Obj3d
 {
 public:
 	Enemy();
+
 	~Enemy();
 	//初期化処理
 	void Initialize();
@@ -37,9 +39,15 @@ public:
 	//エネミーの角度をセットする
 	void SetTrans(const DirectX::SimpleMath::Vector3& translation);
 
+	//エネミーの当たり判定を取得する
+	const SphereNode& GetCollisionNodeEnemy() { return m_CollisionNodeEnemy; }
+
 private:
 	//自機の3Dオブジェクト
 	std::vector<Obj3d> m_ObjEnemy;
+
+	// サイン用の引数となる角度
+	float m_sinAngle;
 
 	//タイマー
 	int m_Timer;
@@ -64,4 +72,7 @@ private:
 
 		ENEMY_PARTS_NUM
 	};
+
+	//エネミーの当たり判定
+	SphereNode m_CollisionNodeEnemy;
 };

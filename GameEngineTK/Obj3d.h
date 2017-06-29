@@ -46,6 +46,9 @@ public:
 	//XV
 	void Update();
 
+	//s—ñ‚ÌŒvZ
+	void Calc();
+
 	//•`‰æ
 	void Draw();
 
@@ -70,8 +73,7 @@ public:
 	const DirectX::SimpleMath::Vector3& GetScale() { return m_scale; }
 
 	//‰ñ“]Šp(X Y Z)
-	const DirectX::SimpleMath::Vector3& GetRotation() { 
-		return m_rotation; }
+	const DirectX::SimpleMath::Vector3& GetRotation() { return m_rotation; }
 
 	//•½sˆÚ“®(X Y Z)
 	const DirectX::SimpleMath::Vector3& GetTranslation() { return m_translation; }

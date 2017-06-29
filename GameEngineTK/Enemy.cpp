@@ -1,5 +1,4 @@
 #include "Enemy.h"
-#include <SimpleMath.h>
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -7,7 +6,10 @@ using namespace DirectX::SimpleMath;
 //コンストラクタ
 Enemy::Enemy()
 {
-	
+
+	m_sinAngle = 0.0f;
+
+	Initialize();
 }
 
 //デストラクタ
@@ -78,6 +80,14 @@ void Enemy::Initialize()
 	pos.z = rand() % 10;
 
 	this->SetTrans(pos);
+
+	{//弾丸用の当たり判定を設定する
+		m_CollisionNodeEnemy.Initialize();
+
+		m_CollisionNodeEnemy.SetParent(&m_ObjEnemy[BODY]);
+		m_CollisionNodeEnemy.SetTrans(Vector3(0, 0, 0));
+		m_CollisionNodeEnemy.SetLocalRadius(0.8f);
+	}
 }
 
 //更新処理
@@ -156,21 +166,19 @@ void Enemy::Update()
 	}
 
 	//各パーツの更新
-	for (std::vector<Obj3d>::iterator it = m_ObjEnemy.begin(); it != m_ObjEnemy.end(); it++)
-	{
-		it->Update();
-	}
-	////移動を反映して行列更新
-	//Calc();
+	Calc();
+
+	//当たり判定の更新
+	m_CollisionNodeEnemy.Update();
 }
 
 //行列更新
 void Enemy::Calc()
 {
-	//for (std::vector<Obj3d>::iterator it = m_ObjEnemy.begin(); it != m_ObjEnemy.end(); it++)
-	//{
-	//	it->Update();
-	//}
+	for (std::vector<Obj3d>::iterator it = m_ObjEnemy.begin(); it != m_ObjEnemy.end(); it++)
+	{
+		it->Update();
+	}
 }
 
 //描画
@@ -181,6 +189,9 @@ void Enemy::Draw()
 	{
 		it->Draw();
 	}
+
+	//当たり判定の描画
+	m_CollisionNodeEnemy.Draw();
 }
 
 //ロボットの挙動
@@ -234,33 +245,8 @@ void Enemy::Action()
 		}
 	}
 
-	//スペースキーを押したら
-	if (m_a_flag == true)
-	{
-		Vector3 a = m_ObjEnemy[L_WEAPON].GetTranslation();
-		Vector3 b = m_ObjEnemy[R_WEAPON].GetTranslation();
-
-		Vector3 l_angle = m_ObjEnemy[L_WEAPON].GetRotation();
-		Vector3 r_angle = m_ObjEnemy[R_WEAPON].GetRotation();
-
-		m_ObjEnemy[L_WEAPON].SetRotation(l_angle);
-		m_ObjEnemy[R_WEAPON].SetRotation(r_angle);
-
-		//移動ベクトル（Z座標）
-		Vector3 moveV(0, 0, -0.2f);
-		Vector3 moveV2(0, 0, -0.2f);
-
-		//移動量ベクトルを自機の角度分回転させる
-		moveV = Vector3::TransformNormal(moveV, m_ObjEnemy[L_WEAPON].GetWorld());
-
-		moveV2 = Vector3::TransformNormal(moveV2, m_ObjEnemy[R_WEAPON].GetWorld());
-
-		m_ObjEnemy[L_WEAPON].SetTranslation(a += moveV);
-		m_ObjEnemy[R_WEAPON].SetTranslation(b += moveV2);
-	}
-
 	//移動ベクトル（Z座標）
-	Vector3 moveV(0, 0, -0.1f);
+	Vector3 moveV(0, 0, -0.02f);
 
 	float angle = m_ObjEnemy[BODY].GetRotation().y;
 
